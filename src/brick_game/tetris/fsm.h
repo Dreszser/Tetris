@@ -6,6 +6,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#define ESCAPE 27
+#define ENTER_KEY 10
+
 typedef enum {
   START = 0,
   SPAWN,
@@ -38,6 +41,7 @@ typedef struct {
 } GameInfo_t;
 
 typedef struct {
+  int **piece;
   int x;
   int y;
 } PlayerPos_t;
@@ -46,7 +50,6 @@ typedef struct game_params {
   GameInfo_t *game_info;
   BrickState_t *state;
   PlayerPos_t *brick_pos;
-  bool *break_flag;
 } Params_t;
 
 typedef void (*signal)(Params_t *prms);
@@ -54,6 +57,12 @@ typedef void (*signal)(Params_t *prms);
 void userInput(UserAction_t action, bool hold);
 
 GameInfo_t updateCurrentState();
+
+Params_t get_params();
+
+UserAction_t get_action();
+
+void game_loop();
 
 void spawn(Params_t *prms);
 void movedown(Params_t *prms);

@@ -5,8 +5,8 @@ void window_init(int time) {
   noecho();
   curs_set(0);
   setlocale(LC_ALL, "");
-  //   timeout(time);
-  (void)time;
+  keypad(stdscr, TRUE);
+  timeout(time);
 
   print_rectangle(SPACE, SPACE, HEIGHT, GAME_W);
   print_rectangle(SPACE, WIDTH - INDICATORS_W, HEIGHT, INDICATORS_W);
