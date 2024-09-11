@@ -1,12 +1,12 @@
 #include "frontend.h"
 
-void window_init(int time) {
+void window_init() {
   initscr();
+  cbreak();
   noecho();
+  nodelay(stdscr, FALSE);
   curs_set(0);
-  setlocale(LC_ALL, "");
   keypad(stdscr, TRUE);
-  timeout(time);
 
   print_rectangle(SPACE, SPACE, HEIGHT, GAME_W);
   print_rectangle(SPACE, WIDTH - INDICATORS_W, HEIGHT, INDICATORS_W);
@@ -31,6 +31,8 @@ void window_init(int time) {
   mvprintw(WIN_SPACE + WIN_NEXT_INTERVAL + 3 * WIN_INTERVAL + 1,
            WIDTH - WIN_W + 6 * SPACE + 1, "qwe");
 
+  mvprintw(HEIGHT / 2, GAME_W / 2 - 6, "Start: ENTER");
+  mvprintw(HEIGHT / 2 + 1, GAME_W / 2 - 6, " Quit: ESCAPE");
 }
 
 void print_rectangle(int x_begin, int y_begin, int x, int y) {

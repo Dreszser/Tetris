@@ -2,7 +2,7 @@
 #include "fsm.h"
 
 int main(void) {
-  window_init(50);
+  window_init();
   game_loop();
   endwin();
   return 0;
@@ -11,7 +11,7 @@ int main(void) {
 void game_loop() {
   Params_t parameters = get_params();
   bool break_flag = true;
-  UserAction_t key = 0;
+  UserAction_t key = get_action();
   bool hold = false;
   while (break_flag) {
     if (*parameters.state == GAMEOVER || *parameters.state == EXIT_STATE)
@@ -19,5 +19,8 @@ void game_loop() {
     userInput(key, hold);
     if (*parameters.state == MOVING || *parameters.state == START)
       key = get_action();
+    mvprintw(8, 2, " %d ", key);
+    //napms(100);
+    refresh();
   }
 }

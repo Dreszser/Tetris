@@ -64,6 +64,7 @@ UserAction_t get_action();
 
 void game_loop();
 
+void start(Params_t *prms);
 void spawn(Params_t *prms);
 void movedown(Params_t *prms);
 void moveright(Params_t *prms);

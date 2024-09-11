@@ -24,6 +24,6 @@
 
 void print_rectangle(int x_begin, int y_begin, int x, int y);
 
-void window_init(int time);
+void window_init();
 
 #endif  // FRONTEND_H

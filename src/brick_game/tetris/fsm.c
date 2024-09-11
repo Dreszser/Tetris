@@ -1,9 +1,9 @@
 #include "fsm.h"
 
 static signal fsm_table[7][8] = {
-    {spawn, NULL, exitstate, NULL, NULL, NULL, NULL, NULL},
+    {start, NULL, exitstate, NULL, NULL, NULL, NULL, NULL},
     {spawn, spawn, spawn, spawn, spawn, spawn, spawn, spawn},
-    {NULL, pause, exitstate, moveleft, moveright, NULL, movedown, rotate},
+    {shifting, pause, exitstate, moveleft, moveright, NULL, movedown, rotate},
     {shifting, shifting, shifting, shifting, shifting, shifting, shifting,
      shifting},
     {attach, attach, attach, attach, attach, attach, attach, attach},
@@ -57,7 +57,15 @@ UserAction_t get_action() {
   return rc;
 }
 
-void spawn(Params_t *prms) { 
+void start(Params_t *prms) {
+  nodelay(stdscr, TRUE);
+  timeout(500);
+  mvprintw(22 / 2, 20 / 2 - 6, "             ");
+  mvprintw(22 / 2 + 1, 20 / 2 - 6, "             ");
+  *prms->state = SPAWN;
+}
+
+void spawn(Params_t *prms) {
   mvprintw(5, 2, "spawn ");
   *prms->state = MOVING;
 }
@@ -69,7 +77,7 @@ void moveright(Params_t *prms) {
   mvprintw(5, 2, "right ");
   *prms->state = MOVING;
 }
-void moveleft(Params_t *prms){
+void moveleft(Params_t *prms) {
   mvprintw(5, 2, "left  ");
   *prms->state = MOVING;
 }
@@ -91,7 +99,16 @@ void exitstate(Params_t *prms) {
 }
 void pause(Params_t *prms) {
   mvprintw(5, 2, "pause ");
-  *prms->state = MOVING;
+  nodelay(stdscr, FALSE);
+  char ch = getch();
+  if (ch == 'P' || ch == 'p') {
+    *prms->state = MOVING;
+    nodelay(stdscr, TRUE);
+  } else if (ch == ESCAPE) {
+    *prms->state = EXIT_STATE;
+  } else {
+    pause(prms);
+  }
 }
 void rotate(Params_t *prms) {
   mvprintw(5, 2, "rotate");
