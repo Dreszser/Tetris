@@ -5,6 +5,7 @@
 #include <ncurses.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define ESCAPE 27
 #define ENTER_KEY 10
@@ -57,6 +58,8 @@ typedef void (*signal)(Params_t *prms);
 void userInput(UserAction_t action, bool hold);
 
 GameInfo_t updateCurrentState();
+void init_field(Params_t *prms);
+void init_piece(Params_t *prms);
 
 Params_t get_params();
 

@@ -5,8 +5,10 @@
 #include <ncurses.h>
 #include <string.h>
 
+#include "fsm.h"
+
 #define SPACE 1
-#define GAME_W 20
+#define GAME_W 22
 #define INDICATORS_W 22
 
 #define HEIGHT 22
@@ -23,6 +25,12 @@
 #define WIN_NEXT_INTERVAL WIN_NEXT_H
 
 void print_rectangle(int x_begin, int y_begin, int x, int y);
+void print_starting_message();
+void clear_field();
+
+void print_stats(GameInfo_t);
+void print_field(GameInfo_t);
+void print_piece(PlayerPos_t);
 
 void window_init();
 

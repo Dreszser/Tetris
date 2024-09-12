@@ -10,6 +10,8 @@ int main(void) {
 
 void game_loop() {
   Params_t parameters = get_params();
+  init_field(&parameters);
+  init_piece(&parameters);
   bool break_flag = true;
   UserAction_t key = get_action();
   bool hold = false;
@@ -17,10 +19,19 @@ void game_loop() {
     if (*parameters.state == GAMEOVER || *parameters.state == EXIT_STATE)
       break_flag = false;
     userInput(key, hold);
+    updateCurrentState();
     if (*parameters.state == MOVING || *parameters.state == START)
       key = get_action();
-    mvprintw(8, 2, " %d ", key);
-    //napms(100);
+    // napms(100);
+    
+    /* else {
+      parameters = get_params();
+      shifting(&parameters);
+    } */
     refresh();
   }
+  free(*parameters.brick_pos->piece);
+  free(parameters.brick_pos->piece);
+  free(*parameters.game_info->field);
+  free(parameters.game_info->field);
 }
