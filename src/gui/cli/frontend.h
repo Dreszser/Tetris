@@ -24,14 +24,29 @@
 #define WIN_INTERVAL WIN_I_H
 #define WIN_NEXT_INTERVAL WIN_NEXT_H
 
-void print_rectangle(int x_begin, int y_begin, int x, int y);
-void print_starting_message();
-void clear_field();
+#define ESCAPE 27
+#define ENTER_KEY 10
 
-void print_stats(GameInfo_t);
-void print_field(GameInfo_t);
-void print_piece(PlayerPos_t);
+void print_rectangle(int x_begin, int y_begin, int vertical_coords,
+                     int horizontal_coords);
+
+void print_starting_message(WINDOW *message);
+void print_pause_message(WINDOW *message);
+void print_game_over_message(WINDOW *message);
+
+void print_stats(WINDOW *next, WINDOW *score);
+void print_field(WINDOW *board);
+void print_piece(WINDOW *board);
+void print_game(WINDOW *board, WINDOW *next, WINDOW *score, WINDOW *message);
+
+void print_pause(WINDOW *message);
+void print_start(WINDOW *messgae);
+void print_game_over(WINDOW *message);
+
+// bool check_borders_for_printing(int vertical_coords, int horizontal_coords);
 
 void window_init();
+
+bool get_action(UserAction_t *key);
 
 #endif  // FRONTEND_H
