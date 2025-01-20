@@ -10,12 +10,12 @@ int main(void) {
 void game_loop() {
   Params_t parameters = get_params();
   initialize_game(&parameters);
-  WINDOW *w_board, *w_next, *w_score, *w_message;  // game windows
-  w_board = newwin(20, 20, 2, 2);
-  w_next = newwin(5, 10, 4, 31);
-  w_score = newwin(12, 18, 10, 26);
-  w_message = newwin(2, 16, 11, 4);
-  print_start(w_message);
+  WINDOW *win_board, *win_next, *win_score, *win_message;  // game windows
+  win_board = newwin(20, 20, 2, 2);
+  win_next = newwin(5, 10, 4, 31);
+  win_score = newwin(12, 18, 10, 26);
+  win_message = newwin(2, 16, 11, 4);
+  // print_start(win_message);
 
   unsigned long last_tick = get_current_time_in_ms();
 
@@ -30,19 +30,18 @@ void game_loop() {
       down_shift();
       last_tick = current_time;
     }
-    UserAction_t key = 0;
+    UserAction_t key = (parameters.game_info->pause ? 7 : 0);
     get_action(&key);
     userInput(key, hold);
-    print_game(w_board, w_next, w_score, w_message);
+    print_game(win_board, win_next, win_score, win_message);
     // update timer if game was paused, or user presses down button
-    if (key == Down || key == Pause || *get_params().state == START)
+    if (key == Down || parameters.game_info->pause)
       last_tick = get_current_time_in_ms();
     napms(20);
   }
-  delwin(w_board);
-  delwin(w_score);
-  delwin(w_next);
-  delwin(w_message);
-  free_field(&parameters);
-  free_next(&parameters);
+  delwin(win_board);
+  delwin(win_score);
+  delwin(win_next);
+  delwin(win_message);
+  free_resources(&parameters);
 }

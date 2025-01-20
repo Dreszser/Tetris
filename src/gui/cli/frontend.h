@@ -34,16 +34,13 @@ void print_starting_message(WINDOW *message);
 void print_pause_message(WINDOW *message);
 void print_game_over_message(WINDOW *message);
 
-void print_stats(WINDOW *next, WINDOW *score);
-void print_field(WINDOW *board);
-void print_piece(WINDOW *board);
+void print_stats(WINDOW *next, WINDOW *score, GameInfo_t game);
+void print_field(WINDOW *board, GameInfo_t game);
 void print_game(WINDOW *board, WINDOW *next, WINDOW *score, WINDOW *message);
 
 void print_pause(WINDOW *message);
 void print_start(WINDOW *messgae);
 void print_game_over(WINDOW *message);
-
-// bool check_borders_for_printing(int vertical_coords, int horizontal_coords);
 
 void window_init();
 

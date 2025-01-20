@@ -48,14 +48,12 @@ void print_game_over_message(WINDOW *message) {
   mvwprintw(message, 1, 1, "Restart: ENTER");
 }
 
-void print_stats(WINDOW *next, WINDOW *score) {
-  Params_t params = get_params();
+void print_stats(WINDOW *next, WINDOW *score, GameInfo_t game) {
   werase(next);
-  for (int i = 0; i < 5 && params.current_figure->block_type != -1; ++i) {
+  for (int i = 0; i < 5 && game.next; ++i) {
     int tmp = 0;
     for (int j = 0; j < 5; ++j) {
-      if (params.game_info->next[i][j] == 1 ||
-          params.game_info->next[i][j] == 2) {
+      if (game.next[i][j] == 1 || game.next[i][j] == 2) {
         mvwaddch(next, i, j + tmp++, ' ' | A_REVERSE);
         mvwaddch(next, i, j + tmp, ' ' | A_REVERSE);
       } else {
@@ -65,70 +63,26 @@ void print_stats(WINDOW *next, WINDOW *score) {
   }
   werase(score);
   box(score, 0, 0);
-  mvwprintw(score, 1, 1, "score: %d", params.game_info->score);
-  mvwprintw(score, 4, 1, "best:  %d", params.game_info->high_score);
-  mvwprintw(score, 7, 1, "level: %d", params.game_info->level);
-  mvwprintw(score, 10, 1, "speed: %d", params.game_info->speed);
-
-  // TODO: information for debugging, need to remove later
-  // mvprintw(26, 2, "               ");
-  /* switch (*params.state) {
-    case 0:
-      mvprintw(26, 2, "start");
-      break;
-    case 1:
-      mvprintw(26, 2, "spawn");
-      break;
-    case 2:
-      mvprintw(26, 2, "moving");
-      break;
-    case 3:
-      mvprintw(26, 2, "shifting");
-      break;
-    case 4:
-      mvprintw(26, 2, "attach");
-      break;
-    case 5:
-      mvprintw(26, 2, "gameover");
-      break;
-    case 6:
-      mvprintw(26, 2, "exit");
-      break;
-  } */
-
-  // mvprintw(27, 2, "%d", params.current_figure->rotation);
-  // mvprintw(28, 2, "%d", params.current_figure->block_type);
+  mvwprintw(score, 1, 1, "score: %d", game.score);
+  mvwprintw(score, 4, 1, "best:  %d", game.high_score);
+  mvwprintw(score, 7, 1, "level: %d", game.level);
+  mvwprintw(score, 10, 1, "speed: %d", game.speed);
 }
 
-void print_field(WINDOW *board) {
-  GameInfo_t ginfo = updateCurrentState();
+void print_field(WINDOW *board, GameInfo_t game) {
   werase(board);
   for (int i = 0; i < 20; ++i) {
     int tmp = 0;
     for (int j = 0; j < 10; ++j) {
-      if (ginfo.field[i][j] == 1) {
-        mvwaddch(board, i, j + tmp++, ACS_CKBOARD /* ' ' | A_REVERSE */);
-        mvwaddch(board, i, j + tmp, ACS_CKBOARD /* ' ' | A_REVERSE */);
+      if (game.field[i][j] == 1) {
+        mvwaddch(board, i, j + tmp++, ACS_CKBOARD);
+        mvwaddch(board, i, j + tmp, ACS_CKBOARD);
+      } else if (game.field[i][j] == 2) {
+        mvwaddch(board, i, j + tmp++, ' ' | A_REVERSE);
+        mvwaddch(board, i, j + tmp, ' ' | A_REVERSE);
       } else {
         mvwaddch(board, i, j + tmp++, ' ');
         mvwaddch(board, i, j + tmp, ' ');
-      }
-    }
-  }
-}
-
-void print_piece(WINDOW *board) {
-  Params_t params = get_params();
-  for (int i = 0; i < 5 && params.current_figure->block_type != -1; ++i) {
-    for (int j = 0; j < 5; ++j) {
-      if (get_block_type(params.current_figure->block_type,
-                         params.current_figure->rotation, i, j) == 1) {
-        mvwaddch(board, i + params.current_figure->vertical_coords - 2,
-                 j * 2 + params.current_figure->horizontal_coords - 2,
-                 ' ' | A_REVERSE);
-        mvwaddch(board, i + params.current_figure->vertical_coords - 2,
-                 j * 2 + params.current_figure->horizontal_coords - 1,
-                 ' ' | A_REVERSE);
       }
     }
   }
@@ -138,15 +92,19 @@ void print_game(WINDOW *board, WINDOW *next, WINDOW *score, WINDOW *message) {
   refresh();
   GameInfo_t game = updateCurrentState();
   switch (game.pause) {
+    case 1:
+      print_start(message);
+      break;
     case 2:
       print_pause(message);
       break;
     case 4:
       print_game_over(message);
+      break;
     default:
-      print_stats(next, score);
-      print_field(board);
-      print_piece(board);
+      werase(message);
+      print_stats(next, score, game);
+      print_field(board, game);
       break;
   }
   wrefresh(board);
@@ -155,111 +113,52 @@ void print_game(WINDOW *board, WINDOW *next, WINDOW *score, WINDOW *message) {
 }
 
 void print_start(WINDOW *message) {
-  Params_t prms = get_params();
-  while (prms.game_info->pause == 1) {
-    print_starting_message(message);
-    wrefresh(message);
-    UserAction_t key = 7;
-    get_action(&key);
-    switch (key) {
-      case Start:
-        prms.game_info->pause = 0;
-        break;
-      case Terminate:
-        prms.game_info->pause = 3;
-        break;
-      default:
-        break;
-    }
-    napms(20);
-  }
-  werase(message);
+  print_starting_message(message);
+  wrefresh(message);
 }
 
 void print_pause(WINDOW *message) {
-  Params_t prms = get_params();
-  while (prms.game_info->pause == 2) {
-    print_pause_message(message);
-    wrefresh(message);
-    UserAction_t key = 7;
-    get_action(&key);
-    switch (key) {
-      case Pause:
-        prms.game_info->pause = 0;
-        break;
-      case Terminate:
-        prms.game_info->pause = 3;
-        break;
-      default:
-        break;
-    }
-    napms(20);
-  }
-  werase(message);
+  print_pause_message(message);
+  wrefresh(message);
 }
 
 void print_game_over(WINDOW *message) {
-  Params_t prms = get_params();
-  while (prms.game_info->pause == 4) {
-    print_game_over_message(message);
-    wrefresh(message);
-    UserAction_t key = 7;
-    get_action(&key);
-    switch (key) {
-      case Start:  // restart the game if user presses ENTER
-        *prms.state = START;
-        prms.game_info->pause = 0;
-        break;
-      case Terminate:
-        prms.game_info->pause = 3;
-        break;
-      default:
-        break;
-    }
-    napms(20);
-  }
-  werase(message);
+  print_game_over_message(message);
+  wrefresh(message);
 }
 
 // Get user input
 bool get_action(UserAction_t *key) {
-  bool input = false;
+  bool input = true;
   int ch = getch();
   switch (ch) {
     case KEY_UP:
       *key = Up;
-      input = true;
       break;
     case KEY_DOWN:
       *key = Down;
-      input = true;
       break;
     case KEY_LEFT:
       *key = Left;
-      input = true;
       break;
     case KEY_RIGHT:
       *key = Right;
-      input = true;
       break;
     case ESCAPE:
       *key = Terminate;
-      input = true;
       break;
     case ENTER_KEY:
       *key = Start;
-      input = true;
       break;
     case ' ':
       *key = Action;
-      input = true;
       break;
     case 'p':
     case 'P':
       *key = Pause;
-      input = true;
       break;
     default:
+      input = false;
       break;
   }
 
