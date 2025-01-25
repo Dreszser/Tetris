@@ -1,7 +1,5 @@
 #include "frontend.h"
 
-#include "pieces.h"
-
 void window_init() {
   initscr();
   cbreak();
@@ -80,6 +78,9 @@ void print_field(WINDOW *board, GameInfo_t game) {
       } else if (game.field[i][j] == 2) {
         mvwaddch(board, i, j + tmp++, ' ' | A_REVERSE);
         mvwaddch(board, i, j + tmp, ' ' | A_REVERSE);
+      } else if (game.field[i][j] == 3) {
+        mvwaddch(board, i, j + tmp++, '[');
+        mvwaddch(board, i, j + tmp, ']');
       } else {
         mvwaddch(board, i, j + tmp++, ' ');
         mvwaddch(board, i, j + tmp, ' ');

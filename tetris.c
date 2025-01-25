@@ -15,7 +15,6 @@ void game_loop() {
   win_next = newwin(5, 10, 4, 31);
   win_score = newwin(12, 18, 10, 26);
   win_message = newwin(2, 16, 11, 4);
-  // print_start(win_message);
 
   unsigned long last_tick = get_current_time_in_ms();
 

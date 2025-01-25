@@ -5,7 +5,7 @@
 #include <ncurses.h>
 #include <string.h>
 
-#include "fsm.h"
+#include "lib_specification.h"
 
 #define SPACE 1
 #define GAME_W 22

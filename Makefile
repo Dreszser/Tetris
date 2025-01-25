@@ -12,7 +12,7 @@ LIB_OBJ_FILES = $(patsubst $(LIB_SRC_DIR)/%.c, obj/%.o, $(BACK))
 rebuild: clean tetris
 
 tetris: s21_tetris.a
-	$(CC) $(CFLAGS) tetris.c ${FRONT} obj/s21_tetris.a -lncurses -o tetris
+	$(CC) $(CFLAGS) tetris.c ${FRONT} obj/s21_tetris.a -lncurses -lm -o tetris
 
 s21_tetris.a: $(LIB_OBJ_FILES)
 	ar rc obj/s21_tetris.a obj/*.o

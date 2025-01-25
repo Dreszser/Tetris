@@ -4,15 +4,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "backend.h"
 #include "def.h"
-#include "score_and_time.h"
-
-typedef void (*signals)(Params_t *prms);
-
-void userInput(UserAction_t action, bool hold);
-
-GameInfo_t updateCurrentState();
 
 void start(Params_t *prms);
 void spawn(Params_t *prms);
