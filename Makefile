@@ -1,4 +1,4 @@
-.PHONY: rebuild clean style
+.PHONY: rebuild clean style clean_record
 
 CC := gcc
 CFLAGS := -I src/brick_game/tetris -I src/gui/cli -I . -std=c11 -Wall -Werror -Wpedantic
@@ -20,6 +20,9 @@ s21_tetris.a: $(LIB_OBJ_FILES)
 
 clean:
 	rm -rf obj/*.o tetris a.out  obj/*.a
+
+clean_record:
+	rm -rf /tmp/.s21
 
 style:
 	cp ../materials/linters/.clang-format ../src/.clang-format

@@ -7,7 +7,7 @@
 void start(Params_t *prms) {
   // TODO: game parameters should reinitialize, high score should be updated and
   // saved between runs
-  clear_field(prms);
+  reinitialize_game(prms);
   *prms->state = SPAWN;
 }
 
@@ -59,7 +59,12 @@ void attach(Params_t *prms) {
   }
 }
 
-void gameover(Params_t *prms) { prms->game_info->pause = 4; }
+void gameover(Params_t *prms) {
+  if (prms->game_info->score > prms->game_info->high_score) {
+    save_high_score(prms);
+  }
+  prms->game_info->pause = 4;
+}
 void exitstate(Params_t *prms) { *prms->state = EXIT_STATE; }
 
 void pause(Params_t *prms) { prms->game_info->pause = 2; }
