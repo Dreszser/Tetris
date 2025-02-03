@@ -1,0 +1,211 @@
+#suite main_tests
+
+#test test1_START_to_MOVING
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+
+  ck_assert_int_eq(*parameters.state, START);
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->pause, 0);
+  userInput(0, false);
+  ck_assert_int_eq(*parameters.state, SPAWN);
+  userInput(0, false);
+  ck_assert_int_eq(*parameters.state, MOVING);
+
+  for(int i = 0; i < 20; ++i) {
+    down_shift();
+  }
+
+  free_resources(&parameters);
+
+#test test2_collision_testing
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+  userInput(0, false);
+  start(&parameters);
+  spawn(&parameters);
+  ck_assert_int_eq(*parameters.state, MOVING);
+  parameters.current_figure->block_type = 1;
+  parameters.current_figure->rotation = 1;
+
+  for(int i = 0; i < 4; ++i) {
+    userInput(7, false);
+  }
+
+  for(int i = 0; i < 10; ++i) {
+    parameters.game_info->field[3][i] = 1;
+  }
+
+  for(int i = 0; i < 6; ++i) {
+    userInput(3, false);
+  }
+  for(int i = 0; i < 4; ++i) {
+    userInput(7, false);
+  }
+
+  for(int i = 0; i < 14; ++i) {
+    userInput(4, false);
+  }
+  for(int i = 0; i < 4; ++i) {
+    userInput(7, false);
+  }
+
+  free_resources(&parameters);
+
+#test test3_scoring
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+  userInput(0, false);
+  start(&parameters);
+  spawn(&parameters);
+
+  userInput(Down, false);
+  userInput(0, false);
+  userInput(0, false);
+  ck_assert_int_eq(*parameters.state, MOVING);
+
+  for(int i = 0; i < 10; ++i) {
+    parameters.game_info->field[19][i] = 1;
+  }
+  userInput(Down, false);
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->score, 100);
+  userInput(0, false);
+
+  for(int i = 0; i < 2; ++i) {
+    for(int j = 0; j < 10; ++j) {
+      parameters.game_info->field[19 - i][j] = 1;
+    }
+  }
+  userInput(Down, false);
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->score, 400);
+  userInput(0, false);
+
+  for(int i = 0; i < 3; ++i) {
+    for(int j = 0; j < 10; ++j) {
+      parameters.game_info->field[19 - i][j] = 1;
+    }
+  }
+  userInput(Down, false);
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->score, 1100);
+  ck_assert_int_eq(parameters.game_info->level, 1);
+  userInput(0, false);
+
+  for(int i = 0; i < 4; ++i) {
+    for(int j = 0; j < 10; ++j) {
+      parameters.game_info->field[19 - i][j] = 1;
+    }
+  }
+  userInput(Down, false);
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->score, 2600);
+  userInput(0, false);
+
+  userInput(0, false);
+  parameters.game_info->level = 10;
+  parameters.game_info->score = 10000;
+  userInput(Down, false);
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->level, 10);
+
+  free_resources(&parameters);
+
+#test test4_gameover
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+  userInput(0, false);
+  start(&parameters);
+
+  for(int j = 0; j < 10; ++j) {
+    parameters.game_info->field[0][j] = 1;
+  }
+
+  spawn(&parameters);
+  ck_assert_int_eq(*parameters.state, GAMEOVER);
+  parameters.game_info->score = 1000;
+  userInput(0, false);
+  ck_assert_int_eq(parameters.game_info->pause, 4);
+  userInput(0, false);
+  userInput(0, false);
+  userInput(0, false);
+
+  for(int j = 0; j < 10; ++j) {
+    parameters.game_info->field[0][j] = 1;
+  }
+  parameters.current_figure->block_type = 1;
+  parameters.current_figure->rotation = 1;
+  attach(&parameters);
+  ck_assert_int_eq(*parameters.state, GAMEOVER);
+  userInput(0, false);
+  userInput(Left, false);
+  userInput(Terminate, false);
+  ck_assert_int_eq(*parameters.state, EXIT_STATE);
+
+  free_resources(&parameters);
+
+#test test5_pause
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+  userInput(0, false);
+  start(&parameters);
+  spawn(&parameters);
+
+  pause(&parameters);
+  ck_assert_int_eq(parameters.game_info->pause, 2);
+  userInput(Left, false);
+  ck_assert_int_eq(parameters.game_info->pause, 2);
+  userInput(Pause, false);
+  ck_assert_int_eq(parameters.game_info->pause, 0);
+
+  free_resources(&parameters);
+
+#test test6_matrices
+  Params_t parameters = get_params();
+  updateCurrentState();
+  GameInfo_t game = updateCurrentState();
+  ck_assert_ptr_null(parameters.game_info->field);
+  ck_assert_ptr_null(parameters.game_info->next);
+
+  copy_matrix(parameters.game_info->field, game.field, 20, 10);
+  copy_matrix(game.field, parameters.game_info->field, 20, 10);
+
+  free_resources(&parameters);
+
+#test test7_tetrominoes_generation
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+  userInput(0, false);
+  start(&parameters);
+  spawn(&parameters);
+  ck_assert_int_eq(*parameters.state, MOVING);
+  for(int i = 0; i < 7; ++i) {
+    parameters.current_figure->block_type = i;
+    userInput(0, false);
+    updateCurrentState();
+  }
+
+  free_resources(&parameters);
+
+#test test8_game_tick
+  Params_t parameters = get_params();
+  initialize_game(&parameters);
+  userInput(0, false);
+  start(&parameters);
+  spawn(&parameters);
+
+  unsigned long last_tick = get_current_time_in_ms();
+  int test = 0;
+  while (test == 0) {
+    unsigned long current_time = get_current_time_in_ms();
+    ck_assert_uint_ge(current_time, last_tick);
+    unsigned long elapsed_time = current_time - last_tick;
+
+    if (elapsed_time >= calculate_tick_interval()) {
+      test = 1;
+      last_tick = current_time;
+    }
+  }
+
+  free_resources(&parameters);

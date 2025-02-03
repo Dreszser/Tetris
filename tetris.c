@@ -1,4 +1,10 @@
-#include "tetris.h"
+#include "backend.h"
+#include "def.h"
+#include "frontend.h"
+#include "fsm.h"
+#include "score_and_time.h"
+
+void game_loop();
 
 int main(void) {
   window_init();

@@ -1,10 +1,15 @@
 #include "backend.h"
 
-#include <stdio.h>
+/**
+ * @file backend.c
+ *
+ * @brief Implementation of functions that allocate/free memory, initialize
+ * structures, check collision.
+ */
 
 #include "pieces.h"
+#include "score_and_time.h"
 
-// Initialize game field
 void init_field(GameInfo_t *game) {
   game->field = (int **)calloc(20, sizeof(int *));
   for (int i = 0; i < 20; ++i) {
@@ -20,7 +25,6 @@ void clear_field(Params_t *prms) {
   }
 }
 
-// Free memory allocated for field
 void free_field(GameInfo_t *game) {
   for (int i = 0; i < 20; ++i) {
     free(game->field[i]);
@@ -28,20 +32,15 @@ void free_field(GameInfo_t *game) {
   free(game->field);
 }
 
-// Initialize current piece
-void init_piece(Params_t *prms) {
-  prms->current_figure->block_type = get_random_number(0, 6);
-  prms->current_figure->rotation = get_random_number(0, 3);
-  prms->current_figure->vertical_coords = 0;
-  prms->current_figure->horizontal_coords =
-      SPAWN_PIXEL + (get_x_displacement(prms->current_figure->block_type,
-                                        prms->current_figure->rotation) *
-                     2);
-}
-
-// Initialize next piece
 void init_next_piece(Params_t *prms) {
-  if (prms->game_info->next) free_next(prms->game_info);
+  if (prms->game_info->next) {
+    clear_next(prms->game_info);
+  } else {
+    prms->game_info->next = (int **)calloc(5, sizeof(int *));
+    for (int i = 0; i < 5; ++i) {
+      prms->game_info->next[i] = (int *)calloc(5, sizeof(int));
+    }
+  }
   prms->next_figure->block_type = get_random_number(0, 6);
   prms->next_figure->rotation = get_random_number(0, 3);
   prms->next_figure->vertical_coords = 0;
@@ -49,9 +48,11 @@ void init_next_piece(Params_t *prms) {
       SPAWN_PIXEL + (get_x_displacement(prms->next_figure->block_type,
                                         prms->next_figure->rotation) *
                      2);
-  prms->game_info->next = (int **)calloc(5, sizeof(int *));
+  get_next(prms);
+}
+
+void get_next(Params_t *prms) {
   for (int i = 0; i < 5; ++i) {
-    prms->game_info->next[i] = (int *)calloc(5, sizeof(int));
     for (int j = 0; j < 5; ++j) {
       prms->game_info->next[i][j] = get_block_type(
           prms->next_figure->block_type, prms->next_figure->rotation, i, j);
@@ -59,7 +60,6 @@ void init_next_piece(Params_t *prms) {
   }
 }
 
-// Initialize all valuable information for new game
 void initialize_game(Params_t *parameters) {
 #if defined(__linux__)
   srand((unsigned int)time(NULL));
@@ -70,7 +70,6 @@ void initialize_game(Params_t *parameters) {
   init_next_piece(parameters);
 }
 
-// transfer next piece to current
 void transfer_next_piece() {
   Params_t params = get_params();
   params.current_figure->block_type = params.next_figure->block_type;
@@ -80,12 +79,19 @@ void transfer_next_piece() {
   params.current_figure->vertical_coords = params.next_figure->vertical_coords;
 }
 
-// Free memory allocated for next piece
 void free_next(GameInfo_t *game) {
   for (int i = 0; i < 5; ++i) {
     free(game->next[i]);
   }
   free(game->next);
+}
+
+void clear_next(GameInfo_t *game) {
+  for (int i = 0; i < 5; ++i) {
+    for (int j = 0; j < 5; ++j) {
+      game->next[i][j] = 0;
+    }
+  }
 }
 
 Params_t get_params() {
@@ -117,7 +123,6 @@ void down_shift() {
   userInput(0, false);
 }
 
-// returns true if no collision is detected
 bool check_collision(BrickInfo_t piece) {
   bool result = 1;
   for (int i = 0; i < 5 && result; ++i) {
@@ -135,13 +140,10 @@ bool check_collision(BrickInfo_t piece) {
   return result;
 }
 
-// Checks for positioning a piece inside playing field
-// returns true if no collision is detected
 bool check_borders_collision(int y, int x) {
   return (y < 22 && x > 1 && x < 22);
 }
 
-// Checks for collision with blocks already on the field
 bool check_field_collision(int y, int x) {
   Params_t params = get_params();
   bool result = 1;
@@ -149,7 +151,6 @@ bool check_field_collision(int y, int x) {
   return result;
 }
 
-// Get random number between a and b
 int get_random_number(int a, int b) {
 #if defined(__linux__)
   return rand() % (b - a + 1) + a;
@@ -162,8 +163,8 @@ void free_resources(Params_t *parameters) {
   GameInfo_t game = updateCurrentState();
   if (parameters->game_info->field) free_field(parameters->game_info);
   if (parameters->game_info->next) free_next(parameters->game_info);
-  if (game.field) free_field(&game);
-  if (game.next) free_next(&game);
+  free_field(&game);
+  free_next(&game);
 }
 
 void copy_matrix(int **original_matrix, int **new_matrix, int rows, int cols) {
@@ -184,23 +185,4 @@ int get_lowest_position(Params_t *prms) {
   int result = prms->current_figure->vertical_coords;
   prms->current_figure->vertical_coords = temp;
   return result;
-}
-
-void get_high_score(Params_t *prms) {
-  FILE *high_score_f = fopen("/tmp/.s21", "r");
-  if (high_score_f) {
-    int high_score = 0;
-    if (fscanf(high_score_f, "%d", &high_score)) {
-      prms->game_info->high_score = high_score;
-    }
-    fclose(high_score_f);
-  }
-}
-
-void save_high_score(Params_t *prms) {
-  FILE *high_score_f = fopen("/tmp/.s21", "w");
-  if (high_score_f) {
-    fprintf(high_score_f, "%d", prms->game_info->score);
-    fclose(high_score_f);
-  }
 }

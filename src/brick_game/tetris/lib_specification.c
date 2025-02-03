@@ -1,10 +1,15 @@
-#include "lib_specification.h"
+// #include "lib_specification.h"
+
+/**
+ * @file lib_specification.c
+ *
+ * @brief Implementation of functions from specification.
+ */
 
 #include "backend.h"
 #include "fsm.h"
 #include "pieces.h"
 
-// Calls a function based on last user input
 void userInput(UserAction_t action, bool hold) {
   static signals fsm_table[7][8] = {
       {start, NULL, exitstate, NULL, NULL, NULL, NULL, NULL},
@@ -35,9 +40,6 @@ void userInput(UserAction_t action, bool hold) {
   }
 }
 
-// Gathers all valuable resources for printint the game screen, creates and
-// returns a static copy of GameInfo_t struct where field has both filled blocks
-// and a falling piece
 GameInfo_t updateCurrentState() {
   Params_t parameters = get_params();
   static GameInfo_t game_to_print = {0};

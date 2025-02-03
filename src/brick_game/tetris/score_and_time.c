@@ -1,5 +1,12 @@
 #include "score_and_time.h"
 
+/**
+ * @file score_and_time.c
+ *
+ * @brief Implementation of functions that work with scores, clearing filled
+ * lines and time intervals between shifting.
+ */
+
 #include "backend.h"
 #include "pieces.h"
 
@@ -11,7 +18,8 @@ bool store_piece(Params_t *prms) {
       int x = prms->current_figure->horizontal_coords;
       if (get_block_type(prms->current_figure->block_type,
                          prms->current_figure->rotation, i, j)) {
-        if (i + y - 2 < 0) {  // trying to store a piece higher than top border
+        if ((i + y - 2 < 0) ||
+            (prms->game_info->field[i + y - 2][(j * 2 + x - 2) / 2]) == 1) {
           success = 0;
         } else {
           prms->game_info->field[i + y - 2][(j * 2 + x - 2) / 2] = 1;
@@ -58,12 +66,13 @@ int get_score(int lines) {
     case 2:
       result = 300;
       break;
-      ;
     case 3:
       result = 700;
       break;
     case 4:
       result = 1500;
+      break;
+    default:
       break;
   }
   return result;
@@ -90,4 +99,24 @@ unsigned long get_current_time_in_ms() {
   struct timespec spec;
   clock_gettime(CLOCK_MONOTONIC, &spec);
   return spec.tv_sec * 1000 + spec.tv_nsec / 1000000;
+}
+
+void get_high_score(Params_t *prms) {
+  FILE *high_score_f = fopen("/tmp/.s21", "r");
+  if (high_score_f) {
+    int high_score = 0;
+
+    fscanf(high_score_f, "%d", &high_score);
+    prms->game_info->high_score = high_score;
+
+    fclose(high_score_f);
+  }
+}
+
+void save_high_score(Params_t *prms) {
+  FILE *high_score_f = fopen("/tmp/.s21", "w");
+  /* if (high_score_f) { */
+  fprintf(high_score_f, "%d", prms->game_info->score);
+  fclose(high_score_f);
+  /*  } */
 }

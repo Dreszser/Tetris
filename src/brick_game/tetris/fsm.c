@@ -1,12 +1,16 @@
 #include "fsm.h"
 
+/**
+ * @file fsm.c
+ *
+ * @brief Implementation of functions that change the state of FSM.
+ */
+
 #include "backend.h"
 #include "pieces.h"
 #include "score_and_time.h"
 
 void start(Params_t *prms) {
-  // TODO: game parameters should reinitialize, high score should be updated and
-  // saved between runs
   reinitialize_game(prms);
   *prms->state = SPAWN;
 }
