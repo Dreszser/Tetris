@@ -2,7 +2,7 @@
 
 Educational project, interactive version of Tetris in C language, using ncurses library for command-line graphics.
 
-![Tetris](link)
+![Tetris](Tetris.gif)
 
 ## Installation
 
